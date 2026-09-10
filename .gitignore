@@ -1,0 +1,43 @@
+# Modelos y pesos binarios
+*.h5
+*.pt
+*.pth
+*.onnx
+models/*.pt
+models/*.h5
+
+# Notebooks (prohibidos por lineamientos del curso)
+*.ipynb
+.ipynb_checkpoints/
+
+# Stubs generados de gRPC (se generan localmente, no se versionan)
+src/grpc_service/inference_pb2.py
+src/grpc_service/inference_pb2_grpc.py
+src/grpc_service/inference_pb2.pyi
+
+# Entornos y cachés de Python / uv
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+uv.lock.bak
+
+# MLflow local
+mlruns/
+mlartifacts/
+
+# Datos crudos pesados (mantener solo estructura + .gitkeep si aplica)
+data/raw/*
+data/processed/*
+data/external/*
+!data/**/.gitkeep
+
+# Variables de entorno / secretos
+.env
+*.key
+
+# Sistema
+.DS_Store

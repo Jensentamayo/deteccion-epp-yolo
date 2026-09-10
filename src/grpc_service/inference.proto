@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package epp_inference;
+
+// Servicio de inferencia de detección de EPP (casco / guantes) sobre imágenes.
+service EPPInferenceService {
+  // Recibe una imagen (bytes) y devuelve las detecciones encontradas.
+  rpc Detect (DetectRequest) returns (DetectResponse);
+
+  // Verifica el estado del servicio y del modelo cargado.
+  rpc HealthCheck (HealthRequest) returns (HealthResponse);
+}
+
+message DetectRequest {
+  bytes image_data = 1;        // Imagen codificada (jpg/png) en bytes.
+  float conf_threshold = 2;    // Umbral de confianza, ej. 0.25.
+  string request_id = 3;       // Identificador opcional para trazabilidad.
+}
+
+message BoundingBox {
+  float x1 = 1;
+  float y1 = 2;
+  float x2 = 3;
+  float y2 = 4;
+}
+
+message Detection {
+  string class_name = 1;       // "helmet", "gloves", "no-helmet", "no-gloves", etc.
+  float confidence = 2;
+  BoundingBox box = 3;
+}
+
+message DetectResponse {
+  repeated Detection detections = 1;
+  float inference_time_ms = 2;
+  string model_version = 3;
+  string request_id = 4;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  bool model_loaded = 1;
+  string model_name = 2;
+}
