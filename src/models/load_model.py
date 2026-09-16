@@ -22,16 +22,18 @@ from ultralytics import YOLO
 
 DEFAULT_MODEL_PATH = os.environ.get(
     "EPP_MODEL_PATH",
-    "models/epp_yolo11n.pt",
+    "models/epp_yolo11n_combined.pt",
 )
 
 # Orden y nombres exactos definidos en data/raw/PPE_Detection/data.yaml.
 DEFAULT_CLASS_NAMES: tuple[str, ...] = (
-    "Gloves",
-    "Vest",
-    "goggles",
     "helmet",
-    "mask",
+    "no_helmet",
+    "Gloves",
+    "no_gloves",
+    "Vest",
+    "Goggles",
+    "Mask",
     "safety_shoe",
 )
 

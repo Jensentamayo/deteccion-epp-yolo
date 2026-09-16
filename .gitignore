@@ -41,3 +41,4 @@ data/external/*
 
 # Sistema
 .DS_Store
+*.db

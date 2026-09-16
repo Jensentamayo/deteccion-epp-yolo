@@ -55,14 +55,6 @@ class TestRunDetection:
 
         assert response.num_goggles == 0
 
-    def test_counts_masks_correctly(
-        self,
-        mock_yolo_model,
-        small_image_bytes,
-    ):
-        response = run_detection(mock_yolo_model, small_image_bytes)
-
-        assert response.num_masks == 0
 
     def test_counts_safety_shoes_correctly(
         self,

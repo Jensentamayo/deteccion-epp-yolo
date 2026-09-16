@@ -1,18 +1,20 @@
 [project]
 name = "deteccion-epp-yolo"
 version = "0.1.0"
-description = "Detección de Elementos de Protección Personal (casco y guantes) en tiempo real con YOLO11n, servido vía gRPC, cliente Streamlit y tracking con MLflow."
+description = "Detección de Elementos de Protección Personal en tiempo real con YOLO11n, servido vía gRPC, cliente Streamlit y tracking con MLflow."
 readme = "README.md"
 requires-python = ">=3.13"
 license = { text = "MIT" }
 authors = [
     { name = "Equipo Talos IA - Módulo 3" }
 ]
+
 dependencies = [
     "ultralytics>=8.3.0",
     "grpcio>=1.66.0",
     "grpcio-tools>=1.66.0",
     "streamlit>=1.38.0",
+    "streamlit-webrtc>=0.77.0",
     "mlflow>=2.16.0",
     "opencv-python-headless>=4.10.0",
     "numpy>=1.26.4",
@@ -32,7 +34,10 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py313"
-exclude = ["src/grpc_service/inference_pb2.py", "src/grpc_service/inference_pb2_grpc.py"]
+exclude = [
+    "src/grpc_service/inference_pb2.py",
+    "src/grpc_service/inference_pb2_grpc.py",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]

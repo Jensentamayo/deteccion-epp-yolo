@@ -35,6 +35,10 @@ message DetectResponse {
   float inference_time_ms = 2;
   string model_version = 3;
   string request_id = 4;
+  int32 num_helmets = 5;
+  int32 num_no_helmets = 6;
+  int32 num_gloves = 7;
+  int32 num_no_gloves = 8;
 }
 
 message HealthRequest {}
