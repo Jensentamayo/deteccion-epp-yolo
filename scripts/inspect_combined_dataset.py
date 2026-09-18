@@ -6,7 +6,6 @@ from pathlib import Path
 
 import cv2
 
-
 DATASET = Path("data/processed/epp_combined")
 OUTPUT = DATASET / "inspection"
 

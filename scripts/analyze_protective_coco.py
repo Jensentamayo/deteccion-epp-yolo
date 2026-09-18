@@ -4,7 +4,6 @@ import json
 from collections import Counter
 from pathlib import Path
 
-
 DATASET = Path("data/processed/inspect_protective")
 
 

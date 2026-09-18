@@ -9,13 +9,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Instala uv (gestor de paquetes/entornos exclusivo del proyecto).
-COPY --from=ghcr.io/astral-sh/uv:0.4.30 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /usr/local/bin/uv
 
 WORKDIR /app
 
 # Copia solo los manifiestos primero para aprovechar la cache de capas.
-COPY pyproject.toml uv.lock* ./
-RUN uv sync --frozen --no-dev || uv sync --no-dev
+COPY pyproject.toml uv.lock* README.md ./
+RUN uv sync --frozen --no-dev --no-install-project
 
 # Copia el resto del código fuente.
 COPY src/ src/

@@ -42,3 +42,7 @@ data/external/*
 # Sistema
 .DS_Store
 *.db
+
+# Datasets y resultados locales de entrenamiento
+data/
+runs/

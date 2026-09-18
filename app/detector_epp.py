@@ -1,17 +1,16 @@
-"""Interfaz Streamlit para detección de EPP en tiempo real.
+"""Interfaz Streamlit para detección de incumplimiento de EPP en tiempo real.
 
 Responsabilidad (capa Vista/Cliente):
 capturar video mediante WebRTC, enviar frames al servicio
-gRPC y dibujar las detecciones producidas por YOLO11n.
-
-Ejecutar con:
-
-    uv run streamlit run app/detector_epp.py
+gRPC y dibujar únicamente las detecciones no_helmet y no_gloves
+producidas por YOLO11n.
 """
 
 from __future__ import annotations
 
+import contextlib
 import io
+import os
 import threading
 
 import av
@@ -20,8 +19,8 @@ import numpy as np
 import streamlit as st
 from PIL import Image
 from streamlit_webrtc import (
-    WebRtcMode,
     VideoProcessorBase,
+    WebRtcMode,
     webrtc_streamer,
 )
 
@@ -29,15 +28,14 @@ from src.grpc_service.client import EPPGrpcClient
 from src.models.predict_model import Detection
 from src.visualizations.draw_boxes import draw_detections
 
-
 st.set_page_config(
-    page_title="Detección de EPP - YOLO11n",
+    page_title="Detección de incumplimiento de EPP - YOLO11n",
     page_icon="🦺",
     layout="wide",
 )
 
 st.title(
-    "🦺 Detección de Elementos de Protección Personal"
+    "🦺 Detección de incumplimiento de EPP"
 )
 
 st.caption(
@@ -51,7 +49,11 @@ JPEG_QUALITY = 80
 PROCESS_EVERY_N_FRAMES = 2
 
 DEFAULT_CONF_THRESHOLD = 0.25
-DEFAULT_GLOVES_THRESHOLD = 0.60
+
+ALLOWED_CLASSES = {
+    "no_helmet",
+    "no_gloves",
+}
 
 
 class EPPVideoProcessor(VideoProcessorBase):
@@ -62,8 +64,7 @@ class EPPVideoProcessor(VideoProcessorBase):
         self._lock = threading.Lock()
 
         self.conf_threshold = DEFAULT_CONF_THRESHOLD
-        self.gloves_threshold = DEFAULT_GLOVES_THRESHOLD
-        self.grpc_address = "localhost:50051"
+        self.grpc_address = f"{os.environ.get('GRPC_HOST', 'localhost')}:{os.environ.get('GRPC_PORT', '50051')}"
 
         self.frame_count = 0
         self.last_inference_ms = 0.0
@@ -77,7 +78,6 @@ class EPPVideoProcessor(VideoProcessorBase):
     def update_config(
         self,
         conf_threshold: float,
-        gloves_threshold: float,
         grpc_address: str,
     ) -> None:
         """Actualiza la configuración del procesador."""
@@ -87,7 +87,6 @@ class EPPVideoProcessor(VideoProcessorBase):
             )
 
             self.conf_threshold = conf_threshold
-            self.gloves_threshold = gloves_threshold
             self.grpc_address = grpc_address
 
         if address_changed:
@@ -138,21 +137,23 @@ class EPPVideoProcessor(VideoProcessorBase):
 
         return buffer.getvalue()
 
+    @staticmethod
     def _filter_detections(
-        self,
         detections,
     ):
-        """Aplica un umbral específico para Gloves."""
-        with self._lock:
-            gloves_threshold = self.gloves_threshold
+        """Conserva únicamente no_helmet y no_gloves."""
 
         filtered = []
 
         for detection in detections:
-            if (
-                detection.class_name.lower() == "gloves"
-                and detection.confidence < gloves_threshold
-            ):
+            normalized = (
+                detection.class_name
+                .strip()
+                .lower()
+                .replace("-", "_")
+            )
+
+            if normalized not in ALLOWED_CLASSES:
                 continue
 
             filtered.append(detection)
@@ -243,43 +244,36 @@ class EPPVideoProcessor(VideoProcessorBase):
 
     def __del__(self) -> None:
         """Cierra el cliente gRPC."""
-        try:
+        with contextlib.suppress(Exception):
             self.client.close()
-        except Exception:
-            pass
 
 
 with st.sidebar:
     st.header("⚙️ Configuración")
 
     conf_threshold = st.slider(
-        "Umbral general",
+        "Umbral de confianza",
         min_value=0.05,
         max_value=0.95,
         value=DEFAULT_CONF_THRESHOLD,
         step=0.05,
         help=(
-            "Umbral mínimo para las detecciones "
-            "generales del modelo."
-        ),
-    )
-
-    gloves_threshold = st.slider(
-        "Umbral para Gloves 🧤",
-        min_value=0.25,
-        max_value=0.95,
-        value=DEFAULT_GLOVES_THRESHOLD,
-        step=0.05,
-        help=(
-            "Umbral específico para reducir "
-            "falsos positivos de guantes."
+            "Confianza mínima requerida para "
+            "mostrar una detección."
         ),
     )
 
     grpc_address = st.text_input(
         "Servicio gRPC",
-        value="localhost:50051",
+        value=f"{os.environ.get('GRPC_HOST', 'localhost')}:{os.environ.get('GRPC_PORT', '50051')}",
     )
+
+    st.divider()
+
+    st.subheader("Detecciones")
+
+    st.write("🔴 No tiene casco → `no_helmet`")
+    st.write("🔴 No tiene guantes → `no_gloves`")
 
     st.divider()
 
@@ -313,7 +307,6 @@ webrtc_ctx = webrtc_streamer(
 if webrtc_ctx.video_processor:
     webrtc_ctx.video_processor.update_config(
         conf_threshold=conf_threshold,
-        gloves_threshold=gloves_threshold,
         grpc_address=grpc_address,
     )
 
@@ -330,19 +323,19 @@ with col1:
 
 with col2:
     st.metric(
-        "Arquitectura",
-        "gRPC",
+        "Clases",
+        "2",
     )
 
 with col3:
     st.metric(
-        "Tracking",
-        "MLflow",
+        "Arquitectura",
+        "gRPC",
     )
 
 
 st.info(
     "Presiona START para activar la cámara. "
-    "El video será procesado continuamente por "
-    "YOLO11n mediante el servicio gRPC."
+    "El sistema detectará únicamente incumplimientos "
+    "de casco y guantes mediante YOLO11n."
 )

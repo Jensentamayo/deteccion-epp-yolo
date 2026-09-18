@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import uuid
 from dataclasses import dataclass
@@ -103,10 +104,8 @@ class EPPGrpcClient:
 
     def __del__(self) -> None:
         """Intenta cerrar el canal cuando el objeto se destruye."""
-        try:
+        with contextlib.suppress(Exception):
             self.close()
-        except Exception:
-            pass
 
 
 def detect(

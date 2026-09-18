@@ -156,7 +156,7 @@ def serve() -> None:
     logger.info("Cargando modelo YOLO11n...")
 
     try:
-        servicer.model
+        _ = servicer.model
     except ModelLoadError:
         logger.exception(
             "No se pudo cargar el modelo."

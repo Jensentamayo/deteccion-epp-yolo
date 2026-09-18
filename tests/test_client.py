@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.grpc_service.client import (
-    ClientDetectResult,
     ClientDetection,
+    ClientDetectResult,
     detect,
 )
 
@@ -32,8 +32,7 @@ def mock_response():
 
 def test_detect_returns_client_detect_result(mock_response):
     """Debe devolver un ClientDetectResult."""
-    with patch("src.grpc_service.client.grpc.insecure_channel") as mock_channel:
-        channel = mock_channel.return_value.__enter__.return_value
+    with patch("src.grpc_service.client.grpc.insecure_channel"):
         channel_stub = MagicMock()
         channel_stub.Detect.return_value = mock_response
 
@@ -50,7 +49,6 @@ def test_detect_returns_client_detect_result(mock_response):
 def test_detect_uses_default_address(mock_response):
     """Debe usar localhost:50051 por defecto."""
     with patch("src.grpc_service.client.grpc.insecure_channel") as mock_channel:
-        channel = mock_channel.return_value.__enter__.return_value
         stub = MagicMock()
         stub.Detect.return_value = mock_response
 
@@ -69,7 +67,6 @@ def test_detect_uses_custom_address(mock_response):
     address = "192.168.1.10:6000"
 
     with patch("src.grpc_service.client.grpc.insecure_channel") as mock_channel:
-        channel = mock_channel.return_value.__enter__.return_value
         stub = MagicMock()
         stub.Detect.return_value = mock_response
 

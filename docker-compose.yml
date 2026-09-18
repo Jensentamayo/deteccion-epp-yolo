@@ -1,10 +1,15 @@
 services:
   mlflow:
-    image: python:3.13-slim
-    command: >
-      bash -c "pip install mlflow==2.16.0 &&
-               mlflow server --host 0.0.0.0 --port 5000
-               --backend-store-uri /mlflow/mlruns"
+    image: python:3.11-slim
+    command:
+      - bash
+      - -c
+      - |
+        pip install --no-cache-dir mlflow==2.16.0 pyarrow==17.0.0 &&
+        mlflow server \
+          --host 0.0.0.0 \
+          --port 5000 \
+          --backend-store-uri /mlflow/mlruns
     ports:
       - "5000:5000"
     volumes:
@@ -17,7 +22,7 @@ services:
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - GRPC_PORT=50051
-      - EPP_MODEL_PATH=/app/models/epp_yolo11n.pt
+      - EPP_MODEL_PATH=/app/models/trained/epp_no_compliance_yolo11n_final.pt
     volumes:
       - ./models:/app/models:ro
     ports:
@@ -25,7 +30,13 @@ services:
 
   streamlit:
     build: .
-    command: ["uv", "run", "streamlit", "run", "app/detector_epp.py", "--server.address=0.0.0.0"]
+    command:
+      - uv
+      - run
+      - streamlit
+      - run
+      - app/detector_epp.py
+      - --server.address=0.0.0.0
     depends_on:
       - inference
     environment:

@@ -1,4 +1,4 @@
-"""Pruebas unitarias de src/visualizations/draw_boxes.py."""
+"""Pruebas unitarias para el dibujo de detecciones de EPP."""
 
 from __future__ import annotations
 
@@ -6,51 +6,172 @@ import numpy as np
 import pytest
 
 from src.models.predict_model import Detection
-from src.visualizations.draw_boxes import _color_for_class, draw_detections
+from src.visualizations.draw_boxes import (
+    _normalize_class_name,
+    draw_detections,
+)
 
 
-class TestColorForClass:
+class TestNormalizeClassName:
+    """Pruebas de normalización de nombres de clases."""
+
     @pytest.mark.parametrize(
-        "class_name",
-        ["no-helmet", "no-gloves", "NO-HELMET", "no-Gloves"],
+        ("value", "expected"),
+        [
+            ("no_helmet", "no_helmet"),
+            ("NO_HELMET", "no_helmet"),
+            ("no-helmet", "no_helmet"),
+        ],
     )
-    def test_violation_classes_are_red(self, class_name):
-        assert _color_for_class(class_name) == (220, 50, 50)
-
-    @pytest.mark.parametrize("class_name", ["helmet", "gloves", "HELMET", "Gloves"])
-    def test_compliant_classes_are_green(self, class_name):
-        assert _color_for_class(class_name) == (46, 204, 113)
-
-    def test_person_class_is_gray(self):
-        assert _color_for_class("person") == (160, 160, 160)
-
-    def test_unknown_class_defaults_to_green(self):
-        assert _color_for_class("something-else") == (46, 204, 113)
+    def test_normalizes_class_name(self, value, expected):
+        assert _normalize_class_name(value) == expected
 
 
 class TestDrawDetections:
-    def test_does_not_mutate_original_image(self, sample_image_array, sample_detections):
-        original_copy = sample_image_array.copy()
-        draw_detections(sample_image_array, sample_detections)
-        assert np.array_equal(sample_image_array, original_copy)
+    """Pruebas del dibujo de cajas."""
 
-    def test_output_has_same_shape(self, sample_image_array, sample_detections):
-        annotated = draw_detections(sample_image_array, sample_detections)
-        assert annotated.shape == sample_image_array.shape
+    def test_returns_copy_of_image(self):
+        image = np.zeros((100, 100, 3), dtype=np.uint8)
 
-    def test_empty_detections_returns_identical_image(self, sample_image_array):
-        annotated = draw_detections(sample_image_array, [])
-        assert np.array_equal(annotated, sample_image_array)
+        result = draw_detections(image, [])
 
-    def test_drawing_changes_pixels_when_detections_present(self, sample_image_array, sample_detections):
-        annotated = draw_detections(sample_image_array, sample_detections)
-        assert not np.array_equal(annotated, sample_image_array)
+        assert result is not image
+        assert result.shape == image.shape
 
-    @pytest.mark.parametrize("num_detections", [1, 2, 5, 10])
-    def test_handles_multiple_detections(self, sample_image_array, num_detections):
+    def test_draws_no_helmet_detection(self):
+        image = np.zeros((100, 100, 3), dtype=np.uint8)
+
+        detection = Detection(
+            class_name="no_helmet",
+            confidence=0.90,
+            x1=10,
+            y1=10,
+            x2=50,
+            y2=50,
+        )
+
+        result = draw_detections(image, [detection])
+
+        assert np.any(result != image)
+
+    def test_draws_no_gloves_detection(self):
+        image = np.zeros((100, 100, 3), dtype=np.uint8)
+
+        detection = Detection(
+            class_name="no_gloves",
+            confidence=0.85,
+            x1=20,
+            y1=20,
+            x2=60,
+            y2=60,
+        )
+
+        result = draw_detections(image, [detection])
+
+        assert np.any(result != image)
+
+    def test_normalizes_hyphenated_class(self):
+        image = np.zeros((100, 100, 3), dtype=np.uint8)
+
+        detection = Detection(
+            class_name="no-helmet",
+            confidence=0.90,
+            x1=10,
+            y1=10,
+            x2=50,
+            y2=50,
+        )
+
+        result = draw_detections(image, [detection])
+
+        assert np.any(result != image)
+
+    def test_ignores_unknown_class(self):
+        image = np.zeros((100, 100, 3), dtype=np.uint8)
+
+        detection = Detection(
+            class_name="helmet",
+            confidence=0.95,
+            x1=10,
+            y1=10,
+            x2=50,
+            y2=50,
+        )
+
+        result = draw_detections(image, [detection])
+
+        assert np.array_equal(result, image)
+
+    def test_ignores_gloves_class(self):
+        image = np.zeros((100, 100, 3), dtype=np.uint8)
+
+        detection = Detection(
+            class_name="gloves",
+            confidence=0.95,
+            x1=10,
+            y1=10,
+            x2=50,
+            y2=50,
+        )
+
+        result = draw_detections(image, [detection])
+
+        assert np.array_equal(result, image)
+
+    def test_draws_multiple_allowed_detections(self):
+        image = np.zeros((120, 120, 3), dtype=np.uint8)
+
         detections = [
-            Detection(class_name="helmet", confidence=0.8, x1=i, y1=i, x2=i + 10, y2=i + 10)
-            for i in range(num_detections)
+            Detection(
+                class_name="no_helmet",
+                confidence=0.90,
+                x1=10,
+                y1=10,
+                x2=50,
+                y2=50,
+            ),
+            Detection(
+                class_name="no_gloves",
+                confidence=0.80,
+                x1=60,
+                y1=60,
+                x2=100,
+                y2=100,
+            ),
         ]
-        annotated = draw_detections(sample_image_array, detections)
-        assert annotated.shape == sample_image_array.shape
+
+        result = draw_detections(image, detections)
+
+        assert np.any(result != image)
+
+    def test_accepts_uppercase_class_name(self):
+        image = np.zeros((100, 100, 3), dtype=np.uint8)
+
+        detection = Detection(
+            class_name="NO_GLOVES",
+            confidence=0.88,
+            x1=10,
+            y1=10,
+            x2=50,
+            y2=50,
+        )
+
+        result = draw_detections(image, [detection])
+
+        assert np.any(result != image)
+
+    def test_accepts_class_name_with_spaces(self):
+        image = np.zeros((100, 100, 3), dtype=np.uint8)
+
+        detection = Detection(
+            class_name=" no_helmet ",
+            confidence=0.88,
+            x1=10,
+            y1=10,
+            x2=50,
+            y2=50,
+        )
+
+        result = draw_detections(image, [detection])
+
+        assert np.any(result != image)

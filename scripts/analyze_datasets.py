@@ -160,10 +160,7 @@ def analyze_dataset(
     for class_id, count in sorted(
         counts.items()
     ):
-        if class_id < len(names):
-            class_name = names[class_id]
-        else:
-            class_name = "DESCONOCIDA"
+        class_name = names[class_id] if class_id < len(names) else "DESCONOCIDA"
 
         print(
             f"  {class_id:>2} | "

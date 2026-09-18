@@ -1,16 +1,11 @@
-"""Carga y cacheo del modelo YOLO11n para detección de EPP.
+"""Carga y cacheo del modelo YOLO11n para detección de incumplimiento de EPP.
 
-Responsabilidad (capa Modelo): exponer una única función que carga
-el modelo una sola vez por proceso y lo reutiliza en cada inferencia,
-evitando recargas innecesarias.
+Responsabilidad (capa Modelo): cargar el modelo entrenado una sola vez
+por proceso y reutilizarlo en cada inferencia.
 
-Las clases corresponden al dataset PPE Detection:
-0 - Gloves
-1 - Vest
-2 - goggles
-3 - helmet
-4 - mask
-5 - safety_shoe
+El modelo final utiliza únicamente dos clases:
+0 - no_helmet
+1 - no_gloves
 """
 
 from __future__ import annotations
@@ -22,19 +17,12 @@ from ultralytics import YOLO
 
 DEFAULT_MODEL_PATH = os.environ.get(
     "EPP_MODEL_PATH",
-    "models/epp_yolo11n_combined.pt",
+    "models/trained/epp_no_compliance_yolo11n_final.pt",
 )
 
-# Orden y nombres exactos definidos en data/raw/PPE_Detection/data.yaml.
 DEFAULT_CLASS_NAMES: tuple[str, ...] = (
-    "helmet",
     "no_helmet",
-    "Gloves",
     "no_gloves",
-    "Vest",
-    "Goggles",
-    "Mask",
-    "safety_shoe",
 )
 
 
@@ -74,14 +62,8 @@ def load_model(model_path: str = DEFAULT_MODEL_PATH) -> YOLO:
 def get_class_names(model: YOLO | None = None) -> tuple[str, ...]:
     """Obtiene los nombres de las clases del modelo.
 
-    Si el modelo está cargado y proporciona sus propios nombres,
-    estos tienen prioridad sobre los nombres predeterminados.
-
-    Args:
-        model: Instancia opcional del modelo YOLO.
-
-    Returns:
-        Tupla con los nombres de las seis clases de EPP.
+    Los nombres almacenados dentro del modelo tienen prioridad sobre
+    los nombres predeterminados.
     """
     if model is not None and getattr(model, "names", None):
         names = model.names
@@ -93,4 +75,3 @@ def get_class_names(model: YOLO | None = None) -> tuple[str, ...]:
             return tuple(names)
 
     return DEFAULT_CLASS_NAMES
-

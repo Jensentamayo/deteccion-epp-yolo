@@ -1,0 +1,20 @@
+{
+    "model": "models/trained/epp_no_compliance_yolo11n_final.pt",
+    "dataset": "data/processed/epp_no_compliance/data.yaml",
+    "backend": "cpu",
+    "confidence_threshold": 0.05,
+    "roc_conf_threshold": 0.001,
+    "image_size": 640,
+    "validation_images": 1814,
+    "evaluated_images": 1814,
+    "accuracy_image_level": 0.9564498346196252,
+    "auc_roc_image_level": 0.9807548739835555,
+    "precision": 0.848521828015067,
+    "recall": 0.6830075783794449,
+    "f1_score": 0.7568210398506489,
+    "map50": 0.7558865018153095,
+    "map50_95": 0.3611925088221043,
+    "latency_mean_ms": 43.651481499910005,
+    "latency_p95_ms": 48.33750599937048,
+    "throughput_fps": 22.908729913372166
+}

@@ -5,7 +5,6 @@ from pathlib import Path
 
 import yaml
 
-
 DATASET = Path("data/raw/complementary/street-work")
 
 

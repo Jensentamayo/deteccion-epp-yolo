@@ -18,7 +18,6 @@ pytest.importorskip(
 
 from src.grpc_service import inference_pb2  # noqa: E402
 from src.grpc_service.server import EPPInferenceServicer  # noqa: E402
-from src.models.load_model import ModelLoadError  # noqa: E402
 
 
 @pytest.fixture
@@ -40,7 +39,7 @@ class TestDetect:
             image_data=small_image_bytes, conf_threshold=0.25, request_id="test-1"
         )
         response = servicer.Detect(request, grpc_context)
-        assert len(response.detections) == 2
+        assert len(response.detections) == 1
 
     def test_preserves_request_id(self, servicer, grpc_context, small_image_bytes):
         request = inference_pb2.DetectRequest(
@@ -54,7 +53,12 @@ class TestDetect:
         servicer.Detect(request, grpc_context)
         grpc_context.set_code.assert_called_once()
 
-    def test_default_conf_threshold_applied_when_zero(self, servicer, grpc_context, small_image_bytes):
+    def test_default_conf_threshold_applied_when_zero(
+        self,
+        servicer,
+        grpc_context,
+        small_image_bytes,
+    ):
         request = inference_pb2.DetectRequest(
             image_data=small_image_bytes, conf_threshold=0.0, request_id="y"
         )
@@ -120,10 +124,10 @@ class TestHealthCheck:
 
         box = response.detections[0].box
 
-        assert box.x1 == pytest.approx(10.0)
-        assert box.y1 == pytest.approx(10.0)
-        assert box.x2 == pytest.approx(50.0)
-        assert box.y2 == pytest.approx(50.0)
+        assert box.x1 == pytest.approx(60.0)
+        assert box.y1 == pytest.approx(20.0)
+        assert box.x2 == pytest.approx(100.0)
+        assert box.y2 == pytest.approx(80.0)
 
 
     def test_returns_detection_class_name(
@@ -138,7 +142,7 @@ class TestHealthCheck:
 
         response = servicer.Detect(request, grpc_context)
 
-        assert response.detections[0].class_name == "helmet"
+        assert response.detections[0].class_name == "no-gloves"
 
 
     def test_returns_detection_confidence(
@@ -153,7 +157,7 @@ class TestHealthCheck:
 
         response = servicer.Detect(request, grpc_context)
 
-        assert response.detections[0].confidence == pytest.approx(0.91)
+        assert response.detections[0].confidence == pytest.approx(0.77)
 
 
     def test_healthcheck_returns_model_name(

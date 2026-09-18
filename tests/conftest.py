@@ -12,7 +12,11 @@ from PIL import Image
 from src.models.predict_model import Detection, InferenceResult
 
 
-def _make_image_bytes(width: int, height: int, color: tuple[int, int, int] = (120, 150, 180)) -> bytes:
+def _make_image_bytes(
+    width: int,
+    height: int,
+    color: tuple[int, int, int] = (120, 150, 180),
+) -> bytes:
     img = Image.new("RGB", (width, height), color=color)
     buf = io.BytesIO()
     img.save(buf, format="PNG")
@@ -58,8 +62,6 @@ def mock_yolo_model(sample_detections):
     model = MagicMock()
     model.names = {0: "helmet", 1: "no-helmet", 2: "gloves", 3: "no-gloves", 4: "person"}
     model.model_name = "yolo11n-epp-mock"
-
-    fake_box = MagicMock()
 
     def _predict(source, conf, verbose):  # noqa: ARG001
         fake_result = MagicMock()

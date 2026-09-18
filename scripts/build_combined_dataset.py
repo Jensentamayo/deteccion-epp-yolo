@@ -8,7 +8,6 @@ from pathlib import Path
 
 import yaml
 
-
 ROOT = Path(".")
 
 PPE_DATASET = ROOT / "data/raw/PPE_Detection"
