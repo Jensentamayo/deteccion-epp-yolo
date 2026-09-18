@@ -5,7 +5,7 @@
 ![gRPC](https://img.shields.io/badge/gRPC-Architecture-orange)
 ![Streamlit](https://img.shields.io/badge/Streamlit-Interface-red)
 ![MLflow](https://img.shields.io/badge/MLflow-Tracking-blue)
-![Tests](https://img.shields.io/badge/Tests-125%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-120%20passed-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ## 📌 Descripción
@@ -396,7 +396,7 @@ uv run pytest -q
 Resultado actual:
 
 ```text
-125 passed
+120 passed
 ```
 
 ### Ejecutar Ruff
@@ -418,7 +418,7 @@ All checks passed!
 El proyecto cuenta actualmente con:
 
 ```text
-125 pruebas unitarias
+120 pruebas unitarias
 ```
 
 Las pruebas cubren diferentes componentes del sistema, incluyendo:
@@ -439,7 +439,7 @@ uv run pytest -q
 La cobertura actual se encuentra aproximadamente en:
 
 ```text
-85 %
+89 %
 ```
 
 ---
