@@ -1,10 +1,417 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>Arquitectura - deteccion-epp-yolo</title></head>
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura - Detección de EPP con YOLO11n</title>
+
+```
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f4f6f8;
+        color: #1f2937;
+    }
+
+    header {
+        background: #111827;
+        color: white;
+        padding: 35px 20px;
+        text-align: center;
+    }
+
+    header h1 {
+        margin: 0 0 10px;
+        font-size: 32px;
+    }
+
+    header p {
+        margin: 0;
+        color: #d1d5db;
+    }
+
+    main {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    section {
+        background: white;
+        border-radius: 14px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    h2 {
+        margin-top: 0;
+        color: #111827;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 12px;
+    }
+
+    .architecture {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 35px 0;
+    }
+
+    .component {
+        width: 190px;
+        min-height: 125px;
+        border: 2px solid #374151;
+        border-radius: 12px;
+        padding: 20px 12px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: #f9fafb;
+    }
+
+    .component strong {
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+
+    .component span {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .streamlit {
+        border-color: #e11d48;
+    }
+
+    .grpc {
+        border-color: #2563eb;
+    }
+
+    .model {
+        border-color: #16a34a;
+    }
+
+    .mlflow {
+        border-color: #9333ea;
+    }
+
+    .arrow {
+        font-size: 30px;
+        color: #4b5563;
+    }
+
+    .tracking {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .tracking-arrow {
+        font-size: 28px;
+        color: #9333ea;
+        margin: 10px;
+    }
+
+    .sequence {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 25px;
+    }
+
+    .step {
+        display: grid;
+        grid-template-columns: 55px 180px 1fr;
+        gap: 15px;
+        align-items: center;
+        padding: 15px;
+        border-radius: 10px;
+        background: #f9fafb;
+        border-left: 5px solid #2563eb;
+    }
+
+    .number {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #2563eb;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .actor {
+        font-weight: bold;
+        color: #111827;
+    }
+
+    .description {
+        color: #4b5563;
+    }
+
+    .layers {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-top: 25px;
+    }
+
+    .layer {
+        padding: 20px;
+        border-radius: 10px;
+        background: #f9fafb;
+        border: 1px solid #d1d5db;
+    }
+
+    .layer h3 {
+        margin-top: 0;
+        color: #111827;
+    }
+
+    .layer ul {
+        padding-left: 20px;
+        margin-bottom: 0;
+    }
+
+    footer {
+        text-align: center;
+        color: #6b7280;
+        padding: 30px;
+        font-size: 14px;
+    }
+
+    @media (max-width: 800px) {
+        .layers {
+            grid-template-columns: 1fr;
+        }
+
+        .step {
+            grid-template-columns: 45px 1fr;
+        }
+
+        .description {
+            grid-column: 2;
+        }
+
+        .arrow {
+            transform: rotate(90deg);
+        }
+    }
+</style>
+```
+
+</head>
+
 <body>
-<h1>Diagrama de arquitectura pendiente</h1>
-<p>Generar con Archify: <code>npx skills add tt-a1i/archify -g</code></p>
-<p>Sugerido: diagrama tipo Architecture (Streamlit, gRPC, servicio de inferencia YOLO11n, MLflow)
-combinado con Sequence para la ruta de inferencia (cliente -> gRPC -> modelo -> respuesta).</p>
+
+<header>
+    <h1>Arquitectura del sistema</h1>
+    <p>Detección de incumplimiento de EPP mediante YOLO11n</p>
+</header>
+
+<main>
+
+```
+<section>
+    <h2>1. Arquitectura general</h2>
+
+    <p>
+        La solución separa la interfaz de usuario, la comunicación entre
+        componentes y la inferencia del modelo. Streamlit actúa como cliente,
+        mientras que el servicio gRPC encapsula la inferencia realizada por YOLO11n.
+    </p>
+
+    <div class="architecture">
+
+        <div class="component streamlit">
+            <strong>Streamlit</strong>
+            <span>Interfaz web / Cliente</span>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="component grpc">
+            <strong>gRPC</strong>
+            <span>Comunicación</span>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="component model">
+            <strong>Servicio de inferencia</strong>
+            <span>YOLO11n</span>
+        </div>
+
+    </div>
+
+    <div class="tracking">
+        <div class="tracking-arrow">↓</div>
+
+        <div class="component mlflow" style="margin: auto;">
+            <strong>MLflow</strong>
+            <span>Tracking de inferencias y métricas</span>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>2. Flujo de inferencia</h2>
+
+    <p>
+        El siguiente flujo representa el recorrido de una imagen desde la
+        interfaz hasta la respuesta generada por el modelo.
+    </p>
+
+    <div class="sequence">
+
+        <div class="step">
+            <div class="number">1</div>
+            <div class="actor">Usuario / Cámara</div>
+            <div class="description">
+                Se obtiene una imagen o frame para realizar la detección.
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="number">2</div>
+            <div class="actor">Streamlit</div>
+            <div class="description">
+                La interfaz recibe la imagen y prepara la solicitud de inferencia.
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="number">3</div>
+            <div class="actor">Cliente gRPC</div>
+            <div class="description">
+                La imagen se envía al servicio de inferencia mediante el contrato
+                definido en <code>inference.proto</code>.
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="number">4</div>
+            <div class="actor">Servidor gRPC</div>
+            <div class="description">
+                El servidor recibe la solicitud y ejecuta el procesamiento
+                correspondiente.
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="number">5</div>
+            <div class="actor">YOLO11n</div>
+            <div class="description">
+                El modelo realiza la detección de las clases
+                <code>no_helmet</code> y <code>no_gloves</code>.
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="number">6</div>
+            <div class="actor">MLflow</div>
+            <div class="description">
+                Se registran métricas y parámetros asociados a la inferencia.
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="number">7</div>
+            <div class="actor">Streamlit</div>
+            <div class="description">
+                La respuesta vuelve al cliente y las detecciones se muestran
+                visualmente mediante cajas de incumplimiento.
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section>
+    <h2>3. Organización de componentes</h2>
+
+    <div class="layers">
+
+        <div class="layer">
+            <h3>Vista</h3>
+            <ul>
+                <li>Streamlit</li>
+                <li>Captura de imágenes</li>
+                <li>Visualización</li>
+            </ul>
+        </div>
+
+        <div class="layer">
+            <h3>Servicio</h3>
+            <ul>
+                <li>gRPC</li>
+                <li>Protocol Buffers</li>
+                <li>Cliente y servidor</li>
+            </ul>
+        </div>
+
+        <div class="layer">
+            <h3>Modelo</h3>
+            <ul>
+                <li>YOLO11n</li>
+                <li>Inferencia</li>
+                <li>Detección EPP</li>
+            </ul>
+        </div>
+
+    </div>
+</section>
+
+<section>
+    <h2>4. Clases detectadas</h2>
+
+    <div class="layers">
+
+        <div class="layer">
+            <h3>no_helmet</h3>
+            <p>
+                Detecta situaciones en las que una persona no utiliza
+                casco de seguridad.
+            </p>
+        </div>
+
+        <div class="layer">
+            <h3>no_gloves</h3>
+            <p>
+                Detecta situaciones en las que una persona no utiliza
+                guantes de seguridad.
+            </p>
+        </div>
+
+        <div class="layer">
+            <h3>Salida</h3>
+            <p>
+                Las detecciones de incumplimiento se representan mediante
+                cajas de color rojo en la interfaz.
+            </p>
+        </div>
+
+    </div>
+</section>
+```
+
+</main>
+
+<footer>
+    Proyecto académico — Inteligencia Artificial y Machine Learning<br>
+    Detección de incumplimiento de EPP con YOLO11n
+</footer>
+
 </body>
 </html>
