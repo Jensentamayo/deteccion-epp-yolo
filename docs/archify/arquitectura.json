@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Sistema de detección de EPP con YOLO11n",
+    "subtitle": "Streamlit + gRPC + servicio de inferencia + MLflow",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1300,
+      800
+    ]
+  },
+  "components": [
+    {
+      "id": "streamlit",
+      "type": "frontend",
+      "label": "Streamlit",
+      "sublabel": "Interfaz web",
+      "pos": [
+        60,
+        320
+      ],
+      "size": [
+        230,
+        100
+      ]
+    },
+    {
+      "id": "grpc",
+      "type": "messagebus",
+      "label": "gRPC",
+      "sublabel": "Contrato .proto / comunicación RPC",
+      "pos": [
+        400,
+        320
+      ],
+      "size": [
+        230,
+        100
+      ]
+    },
+    {
+      "id": "inference",
+      "type": "backend",
+      "label": "Servicio de inferencia",
+      "sublabel": "Procesamiento y lógica de detección",
+      "pos": [
+        750,
+        320
+      ],
+      "size": [
+        280,
+        100
+      ]
+    },
+    {
+      "id": "yolo",
+      "type": "backend",
+      "label": "YOLO11n",
+      "sublabel": "no_helmet / no_gloves",
+      "pos": [
+        1050,
+        180
+      ],
+      "size": [
+        250,
+        100
+      ]
+    },
+    {
+      "id": "mlflow",
+      "type": "database",
+      "label": "MLflow",
+      "sublabel": "Experimentos, métricas y artefactos",
+      "pos": [
+        1050,
+        500
+      ],
+      "size": [
+        250,
+        100
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "streamlit-grpc",
+      "from": "streamlit",
+      "to": "grpc",
+      "label": "Solicitud",
+      "variant": "default",
+      "labelDy": -45
+    },
+    {
+      "id": "grpc-inference",
+      "from": "grpc",
+      "to": "inference",
+      "label": "RPC",
+      "variant": "default",
+      "labelDy": -45
+    },
+    {
+      "id": "inference-yolo",
+      "from": "inference",
+      "to": "yolo",
+      "label": "Inferencia",
+      "variant": "default",
+      "labelAt": [
+        1125,
+        294
+      ]
+    },
+    {
+      "id": "yolo-inference",
+      "from": "yolo",
+      "to": "inference",
+      "variant": "dashed"
+    },
+    {
+      "id": "inference-mlflow",
+      "from": "inference",
+      "to": "mlflow",
+      "label": "Métricas",
+      "variant": "dashed",
+      "labelDx": 35,
+      "labelDy": 10
+    },
+    {
+      "id": "inference-grpc",
+      "from": "inference",
+      "to": "grpc",
+      "variant": "dashed"
+    }
+  ]
+}
