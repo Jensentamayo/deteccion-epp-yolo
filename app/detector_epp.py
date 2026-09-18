@@ -64,10 +64,10 @@ class EPPVideoProcessor(VideoProcessorBase):
         self._lock = threading.Lock()
 
         self.conf_threshold = DEFAULT_CONF_THRESHOLD
-        self.grpc_address = f"{os.environ.get('GRPC_HOST', 'localhost')}:{os.environ.get('GRPC_PORT', '50051')}"
-
-        self.frame_count = 0
-        self.last_inference_ms = 0.0
+        self.grpc_address = (
+            f"{os.environ.get('GRPC_HOST', 'localhost')}:"
+            f"{os.environ.get('GRPC_PORT', '50051')}"
+        )
         self.last_detection_count = 0
 
         self.client = EPPGrpcClient(
