@@ -297,6 +297,12 @@ Las detecciones de:
 no_helmet
 no_gloves
 ```
+Ejemplo de funcionamiento:
+Sin casco =
+<img width="2312" height="1092" alt="no_helmet" src="https://github.com/user-attachments/assets/e6d02aed-4b91-40ce-82ba-cf9b5e5cdafb" />
+
+Sin guantes = 
+<img width="2316" height="1078" alt="no_gloves" src="https://github.com/user-attachments/assets/3da66efc-5188-4e27-a9dd-8372d77d2113" />
 
 son mostradas visualmente sobre la imagen procesada.
 
